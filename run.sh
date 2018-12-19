@@ -1,2 +1,2 @@
 cd oj/
-scrapy crawl problem
+scrapy crawl demo
