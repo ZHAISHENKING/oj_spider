@@ -32,5 +32,6 @@ class RandomUserAgentMiddleware(object):
 
 class RandomProxyMiddleware(object):
     def process_request(self,request,spider):
-        proxy = 'http://' + requests.get('localhost:5011/get/').text
+        proxy = 'http://' + requests.get('http://127.0.0.1:5011/get/').text
         request.meta['proxy'] = proxy
+        print("使用的ip是"+proxy)

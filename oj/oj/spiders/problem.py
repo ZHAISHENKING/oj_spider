@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import scrapy
+import json
 from scrapy import Request
 # from scrapy.shell import inspect_response
-from scrapy_redis.spiders import RedisSpider
 from oj.items import OjItem
 import time, os
 import requests
@@ -10,81 +10,82 @@ import re
 # import tomd
 
 
-class ProblemSpider(RedisSpider):
+class ProblemSpider(scrapy.Spider):
     name = 'problem'
     allowed_domains = ['loj.ac']
-    redis_key = 'problem:start_urls'
-    # start_urls = ['https://loj.ac/problem']
-
-    def __init__(self, *args, **kwargs):
-        domain = kwargs.pop('domain', '')
-        self.allowed_domains = filter(None, domain.split(','))
-        super(ProblemSpider, self).__init__(*args, **kwargs)
+    start_urls = ['https://loj.ac/problems']
 
     def parse(self, response):
         """处理问题列表"""
-        parents = response.xpath('//div[@class="ui main container"]')
+        for i in range(32):
+            i = i+1
+            url_list = "https://loj.ac/problems?page=%d" % i
+            request = Request(url_list, callback=self.parse_post, dont_filter=True)
+            yield request
 
-        for parent in parents:
-            post = OjItem()
+    def parse_post(self, response):
+        ul = response.xpath('//table/tbody//tr')
+        for li in ul:
+            post = dict()
+            title = li.xpath('./td//a/text()')
+            if len(title) > 1:
+                t, *c = title
+                post['title'] = t.get()
+                post["category"] = str([i.get() for i in c])
+            url = "https://loj.ac" + li.xpath('./td//a/@href').get()
+            post["num"] = url.rsplit('/', 1)[1]
+            print(post["num"])
+            request = Request(url, callback=self.parse_detail, dont_filter=True)
+            request.meta["post"] = post
+            yield request
+            time.sleep(3)
 
-            try:
-                title = parent.xpath("//h1[@class='ui header']/text()").get().split(".", 1)
-                post["number"] = title[0].split("#")[1]
-                post['title'] = title[1]
+    def parse_detail(self, response):
+        post = response.meta["post"]
 
-                r = requests.get('https://loj.ac/problem/%d/testdata/download' % post["number"])
-                filename = 'package/problem%d.zip' % post["number"]
-                if not os.path.exists(os.path.split(filename)[0]):
-                    # 目录不存在创建，makedirs可以创建多级目录
-                    os.makedirs(os.path.split(filename)[0])
-                with open(filename, 'wb') as fp:
-                    fp.write(r.content)
-                print(filename + "下载完毕")
+        try:
+            post['desc'] = self.html2md(
+                response.xpath("//div[@class='row'][2]//div[@class='ui bottom attached segment font-content']")[
+                    0])
+        except Exception:
+            post["desc"] = ""
+        try:
+            post["input_desc"] = self.html2md(
+                response.xpath("//div[@class='row'][3]//div[@class='ui bottom attached segment font-content']")[
+                    0])
+        except Exception:
+            post["input_desc"] = ""
+        try:
+            post["output_desc"] = self.html2md(
+                response.xpath("//div[@class='row'][4]//div[@class='ui bottom attached segment font-content']")[
+                    0])
+        except Exception:
+            post["output_desc"] = ""
+        try:
+            post['example_input'] = self.html2md(
+                response.xpath("//div[@class='ui existing segment'][1]/pre/code[@class='lang-plain']")[0])
+        except Exception:
+            post['example_input'] = ""
+        try:
+            post['example_output'] = self.html2md(
+                response.xpath("//div[@class='ui existing segment'][2]/pre/code[@class='lang-plain']")[0])
+        except Exception:
+            post["example_output"] = ""
+        try:
+            post['tig'] = self.html2md(response.xpath("//div[@class='row'][6]//p")[0])
+        except Exception:
+            post['tig'] = ""
 
-                try:
-                    post['desc'] = self.html2md(
-                        parent.xpath("//div[@class='row'][2]//div[@class='ui bottom attached segment font-content']")[
-                            0])
-                except Exception:
-                    post["desc"] = ""
-                try:
-                    post["input_desc"] = self.html2md(
-                        parent.xpath("//div[@class='row'][3]//div[@class='ui bottom attached segment font-content']")[
-                            0])
-                except Exception:
-                    post["input_desc"] = ""
-                try:
-                    post["output_desc"] = self.html2md(
-                        parent.xpath("//div[@class='row'][4]//div[@class='ui bottom attached segment font-content']")[
-                            0])
-                except Exception:
-                    post["output_desc"] = ""
-                try:
-                    post['example_input'] = self.html2md(
-                        parent.xpath("//div[@class='ui existing segment'][1]/pre/code[@class='lang-plain']")[0])
-                except Exception:
-                    post['example_input'] = ""
-                try:
-                    post['example_output'] = self.html2md(
-                        parent.xpath("//div[@class='ui existing segment'][2]/pre/code[@class='lang-plain']")[0])
-                except Exception:
-                    post["example_output"] = ""
-                try:
-                    post['tig'] = self.html2md(parent.xpath("//div[@class='row'][6]//p")[0])
-                except Exception:
-                    post['tig'] = ""
+        # except Exception as e:
+        #     print(e)
+        # finally:
+        with open('oj.json', 'a+', encoding='utf-8') as f:
+            json_str = json.dumps(post, ensure_ascii=False, indent=4)
+            f.write(json_str + "," + '\n')
+            f.close()
+        yield post
 
-                cate = parent.xpath("//div[@id='show_tag_div']//text()")
-                s = ""
-                for i in cate:
-                    s += i.get() + " "
-                post["category"] = s
-            except Exception as e:
-                print(e)
-            finally:
-                yield post
-                print(post)
+
 
     @staticmethod
     def html2md(s):

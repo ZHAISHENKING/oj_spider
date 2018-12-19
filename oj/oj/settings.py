@@ -14,9 +14,9 @@ BOT_NAME = 'oj'
 SPIDER_MODULES = ['oj.spiders']
 NEWSPIDER_MODULE = 'oj.spiders'
 
-SCHEDULER = "scrapy_redis.scheduler.Scheduler"
-DUPEFILTER_CLASS = "scrapy_redis.dupefilter.RFPDupeFilter"
-REDIS_URL = 'redis://127.0.0.1:6379'
+# SCHEDULER = "scrapy_redis.scheduler.Scheduler"
+# DUPEFILTER_CLASS = "scrapy_redis.dupefilter.RFPDupeFilter"
+# REDIS_URL = 'redis://127.0.0.1:6379'
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.87 Safari/537.36'
@@ -70,7 +70,7 @@ DEFAULT_REQUEST_HEADERS = {
 # See https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {
     'oj.middlewares.RandomUserAgentMiddleware': 543,
-    'oj.middlewares.RandomProxyMiddleware': 345
+    # 'oj.middlewares.RandomProxyMiddleware': 345
 }
 
 # Enable or disable extensions
@@ -81,9 +81,9 @@ DOWNLOADER_MIDDLEWARES = {
 
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
-ITEM_PIPELINES = {
-   'oj.pipelines.OjPipeline': 300,
-}
+# ITEM_PIPELINES = {
+#    'oj.pipelines.OjPipeline': 300,
+# }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://doc.scrapy.org/en/latest/topics/autothrottle.html
