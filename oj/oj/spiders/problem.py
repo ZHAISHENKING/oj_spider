@@ -27,63 +27,66 @@ class ProblemSpider(scrapy.Spider):
         ul = response.xpath('//table/tbody//tr')
         for li in ul:
             post = dict()
-            title = li.xpath('./td//a/text()')
-            if len(title) > 1:
-                t, *c = title
-                post['title'] = t.get()
-                post["category"] = str([i.get() for i in c])
+            # title = li.xpath('./td//a/text()')
+            # if len(title) > 1:
+            #     t, *c = title
+            #     post['title'] = t.get()
+            #     post["category"] = str([i.get() for i in c])
             url = "https://loj.ac" + li.xpath('./td//a/@href').get()
             post["num"] = url.rsplit('/', 1)[1]
-            print(post["num"])
-            request = Request(url, callback=self.parse_detail, dont_filter=True)
-            request.meta["post"] = post
+            filename = 'package/problem%s.zip' % post["num"]
+            r = requests.get('https://loj.ac/problem/%s/testdata/download' % post["num"])
+            with open(filename, "wb") as f:
+                f.write(r.content)
+            request = Request(url, callback=self.parse_post, dont_filter=True)
+            # request.meta["post"] = post
             yield request
             time.sleep(3)
 
-    def parse_detail(self, response):
-        post = response.meta["post"]
-
-        try:
-            post['desc'] = self.html2md(
-                response.xpath("//div[@class='row'][2]//div[@class='ui bottom attached segment font-content']")[
-                    0])
-        except Exception:
-            post["desc"] = ""
-        try:
-            post["input_desc"] = self.html2md(
-                response.xpath("//div[@class='row'][3]//div[@class='ui bottom attached segment font-content']")[
-                    0])
-        except Exception:
-            post["input_desc"] = ""
-        try:
-            post["output_desc"] = self.html2md(
-                response.xpath("//div[@class='row'][4]//div[@class='ui bottom attached segment font-content']")[
-                    0])
-        except Exception:
-            post["output_desc"] = ""
-        try:
-            post['example_input'] = self.html2md(
-                response.xpath("//div[@class='ui existing segment'][1]/pre/code[@class='lang-plain']")[0])
-        except Exception:
-            post['example_input'] = ""
-        try:
-            post['example_output'] = self.html2md(
-                response.xpath("//div[@class='ui existing segment'][2]/pre/code[@class='lang-plain']")[0])
-        except Exception:
-            post["example_output"] = ""
-        try:
-            post['tig'] = self.html2md(response.xpath("//div[@class='row'][6]//p")[0])
-        except Exception:
-            post['tig'] = ""
-
-        # except Exception as e:
-        #     print(e)
-        # finally:
-        with open('oj.json', 'a+', encoding='utf-8') as f:
-            json_str = json.dumps(post, ensure_ascii=False, indent=4)
-            f.write(json_str + "," + '\n')
-            f.close()
-        yield post
+    # def parse_detail(self, response):
+    #     post = response.meta["post"]
+    #
+    #     try:
+    #         post['desc'] = self.html2md(
+    #             response.xpath("//div[@class='row'][2]//div[@class='ui bottom attached segment font-content']")[
+    #                 0])
+    #     except Exception:
+    #         post["desc"] = ""
+    #     try:
+    #         post["input_desc"] = self.html2md(
+    #             response.xpath("//div[@class='row'][3]//div[@class='ui bottom attached segment font-content']")[
+    #                 0])
+    #     except Exception:
+    #         post["input_desc"] = ""
+    #     try:
+    #         post["output_desc"] = self.html2md(
+    #             response.xpath("//div[@class='row'][4]//div[@class='ui bottom attached segment font-content']")[
+    #                 0])
+    #     except Exception:
+    #         post["output_desc"] = ""
+    #     try:
+    #         post['example_input'] = self.html2md(
+    #             response.xpath("//div[@class='ui existing segment'][1]/pre/code[@class='lang-plain']")[0])
+    #     except Exception:
+    #         post['example_input'] = ""
+    #     try:
+    #         post['example_output'] = self.html2md(
+    #             response.xpath("//div[@class='ui existing segment'][2]/pre/code[@class='lang-plain']")[0])
+    #     except Exception:
+    #         post["example_output"] = ""
+    #     try:
+    #         post['tig'] = self.html2md(response.xpath("//div[@class='row'][6]//p")[0])
+    #     except Exception:
+    #         post['tig'] = ""
+    #
+    #     # except Exception as e:
+    #     #     print(e)
+    #     # finally:
+    #     with open('oj.json', 'a+', encoding='utf-8') as f:
+    #         json_str = json.dumps(post, ensure_ascii=False, indent=4)
+    #         f.write(json_str + "," + '\n')
+    #         f.close()
+    #     yield post
 
 
 
