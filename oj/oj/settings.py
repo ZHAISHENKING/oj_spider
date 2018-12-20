@@ -19,7 +19,7 @@ NEWSPIDER_MODULE = 'oj.spiders'
 # REDIS_URL = 'redis://127.0.0.1:6379'
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.87 Safari/537.36'
+# USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.87 Safari/537.36'
 SCHEDULER_PERSIST = True
 
 
@@ -57,7 +57,7 @@ DEFAULT_REQUEST_HEADERS = {
     "Host":"loj.ac",
     "Referer":"https://loj.ac/problem",
     "Upgrade-Insecure-Requests":"1",
-    "User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.110 Safari/537.36"
+    # "User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2765.26 Safari/537.36"
 }
 
 # Enable or disable spider middlewares

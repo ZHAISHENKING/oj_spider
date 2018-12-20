@@ -13,7 +13,7 @@ import re
 class ProblemSpider(scrapy.Spider):
     name = 'problem'
     allowed_domains = ['loj.ac']
-    start_urls = ['https://loj.ac/problems']
+    start_urls = ['https://loj.ac/problem']
 
     def parse(self, response):
         """处理问题列表"""
