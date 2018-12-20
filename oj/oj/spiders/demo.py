@@ -118,7 +118,8 @@ class ProblemSpider(scrapy.Spider):
         title = response.xpath("//h1[@class='ui header']/text()").get().split(".", 1)
         post["number"] = title[0].split("#")[1]
         post['title'] = title[1]
-
+        cate = parent.xpath("//div[@id='show_tag_div']//text()")
+        post['category'] = ''.join([i.get() for i in cate])
         try:
             post['desc'] = self.html2md(
                 response.xpath("//div[@class='row'][2]//div[@class='ui bottom attached segment font-content']")[
