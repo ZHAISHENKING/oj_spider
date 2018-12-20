@@ -1,14 +1,13 @@
-
 # -*- coding: utf-8 -*-
 import scrapy
 import json
-from scrapy import Request
+from scrapy.http import Request
 # from scrapy.shell import inspect_response
 from oj.items import OjItem
 import time, os
 import requests
 import re
-# import tomd
+from scrapy.selector import Selector
 
 
 class ProblemSpider(scrapy.Spider):
@@ -110,38 +109,15 @@ class ProblemSpider(scrapy.Spider):
              139, 140, 141, 143, 144, 145]
         for i in a:
             url = "https://loj.ac/problem/%d" % i
-            request = Request(url, callback=self.parse_post, dont_filter=True)
+            request = Request(url, callback=self.parse_post)
             request.meta["num"] = i
             yield request
 
-
-    # def parse_post(self, response):
-    #     ul = response.xpath('//table/tbody//tr')
-    #     for li in ul:
-    #         post = dict()
-    #         title = li.xpath('./td//a/text()')
-    #         if len(title) > 1:
-    #             t, *c = title
-    #             post['title'] = t.get()
-    #             post["category"] = str([i.get() for i in c])
-    #         url = "https://loj.ac" + li.xpath('./td//a/@href').get()
-    #         post["num"] = url.rsplit('/', 1)[1]
-    #         print(post["num"])
-    #         request = Request(url, callback=self.parse_detail, dont_filter=True)
-    #         request.meta["post"] = post
-    #         yield request
-    #         # time.sleep(3)
-    #     return
-
     def parse_post(self, response):
-        print(response.meta["num"])
         post = {}
-        try:
-            title = response.xpath("//h1[@class='ui header']/text()").get().split(".", 1)
-            post["number"] = title[0].split("#")[1]
-            post['title'] = title[1]
-        except Exception:
-            yield
+        title = response.xpath("//h1[@class='ui header']/text()").get().split(".", 1)
+        post["number"] = title[0].split("#")[1]
+        post['title'] = title[1]
 
         try:
             post['desc'] = self.html2md(
@@ -187,15 +163,10 @@ class ProblemSpider(scrapy.Spider):
     @staticmethod
     def html2md(s):
 
-        # md = tomd.Tomd().markdown
         q = re.sub(re.compile("(<math>.+?</math>)", re.S), "", s.extract())
-        while re.search(re.compile('</div>'),q):
-            q = re.sub(re.compile("<div.*?>(.+?)</div>", re.S), "\\1", q)
-        while re.search(re.compile('</p>'), q):
-            q = re.sub(re.compile("<p.*?>(.+?)</p>", re.S), "\\1", q)
-        while re.search(re.compile('</code>'), q):
-            q = re.sub(re.compile("<code.*?>(.+?)</code>", re.S), "\\1", q)
-        while re.search(re.compile("</span>"), q):
-            q = re.sub(re.compile('(<span.*?>)(.*?)(</span>)', re.S), "\\2", q)
+        selector = Selector(text=q)
+        a = selector.xpath(".//text()")
+        s = [i.get() for i in a]
+        q = "".join(s)
 
         return q
