@@ -114,6 +114,25 @@ class ProblemSpider(scrapy.Spider):
             request.meta["num"] = i
             yield request
 
+
+    # def parse_post(self, response):
+    #     ul = response.xpath('//table/tbody//tr')
+    #     for li in ul:
+    #         post = dict()
+    #         title = li.xpath('./td//a/text()')
+    #         if len(title) > 1:
+    #             t, *c = title
+    #             post['title'] = t.get()
+    #             post["category"] = str([i.get() for i in c])
+    #         url = "https://loj.ac" + li.xpath('./td//a/@href').get()
+    #         post["num"] = url.rsplit('/', 1)[1]
+    #         print(post["num"])
+    #         request = Request(url, callback=self.parse_detail, dont_filter=True)
+    #         request.meta["post"] = post
+    #         yield request
+    #         # time.sleep(3)
+    #     return
+
     def parse_post(self, response):
         print(response.meta["num"])
         post = {}
