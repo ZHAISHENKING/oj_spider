@@ -113,6 +113,7 @@ class ProblemSpider(scrapy.Spider):
             with open(filename, "wb") as f:
                 f.write(r.content)
             yield
+            time.sleep(2)
 
     def parse_post(self, response):
         pass
