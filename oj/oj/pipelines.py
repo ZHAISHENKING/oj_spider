@@ -11,7 +11,7 @@ class OjPipeline(object):
 
     # 蜘蛛开始爬取的时候自动调用
     def open_spider(self, spider):
-        self.fp = open('oj.json', 'a+', encoding='utf-8')
+        self.fp = open('/Users/mac/Desktop/rename/package', 'a+', encoding='utf-8')
 
     def close_spider(self, spider):
         self.fp.close()
