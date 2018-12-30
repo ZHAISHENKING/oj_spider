@@ -1,6 +1,7 @@
 """
 批量导入数据库
 """
+
 def input_data():
     import json
     jstr = "oj.json"
