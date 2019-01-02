@@ -1,3 +1,6 @@
+"""
+对比输出未爬取的文件
+"""
 import json
 
 st = "/Users/mac/Desktop/"
